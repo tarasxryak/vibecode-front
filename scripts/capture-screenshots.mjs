@@ -38,6 +38,8 @@ for (const [device, viewport] of Object.entries(viewports)) {
     locale: "ru-RU",
     timezoneId: "Europe/Moscow",
     deviceScaleFactor: 2,
+    // A still frame of the animated backgrounds, so the screenshots are reproducible.
+    reducedMotion: "reduce",
   })
   const page = await context.newPage()
 
@@ -45,6 +47,11 @@ for (const [device, viewport] of Object.entries(viewports)) {
     await page.goto(new URL(`../prototype/index.html#${state}`, import.meta.url).href)
     await page.evaluate(() => document.fonts.ready)
     await page.screenshot({ path: `prototype/screenshots/${device}-${state}.png`, fullPage: true })
+  }
+  for (const bg of ["desert", "fuji", "harbour"]) {
+    await page.goto(new URL(`../prototype/index.html?bg=${bg}#success`, import.meta.url).href)
+    await page.evaluate(() => document.fonts.ready)
+    await page.screenshot({ path: `prototype/screenshots/${device}-bg-${bg}.png` })
   }
 
   await page.clock.setFixedTime(NOW)
@@ -72,6 +79,21 @@ for (const [device, viewport] of Object.entries(viewports)) {
   await app("empty", { json: { report: null } }, "2026-11-04")
   await app("current-week", { json: { report: null } }, "2026-11-24")
   await app("error", { status: 502, json: { error: "Сервис отчётов не ответил." } }, "2026-11-18")
+
+  // Art backgrounds: first viewport only, so the scene and the panel are both in frame.
+  const labels = { desert: "Пустыня", fuji: "Фудзи", harbour: "Гавань" }
+  for (const [bg, label] of Object.entries(labels)) {
+    await page.unroute("**/api/report?*")
+    await page.route("**/api/report?*", (route) => route.fulfill({ json: report }))
+    await page.goto(`${appUrl}/?week=2026-11-18`)
+    await page.getByRole("button", { name: label }).click()
+    await page.getByRole("table", { name: "По автору" }).waitFor()
+    await page.locator('[data-testid="ascii-backdrop"] canvas').waitFor()
+    await page.waitForTimeout(400)
+    await page.mouse.move(0, 0)
+    await page.screenshot({ path: `docs/screenshots/${device}-bg-${bg}.png` })
+  }
+  await page.getByRole("button", { name: "Без фона" }).click()
   await context.close()
 }
 

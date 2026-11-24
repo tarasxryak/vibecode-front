@@ -129,6 +129,25 @@
   .trend .missing { color: var(--muted); }
   .mbars { display: none; }
 
+  /* Фоны: сцена ASCII Magic в стиле «lines» под почти непрозрачной панелью (как в src/app/globals.css) */
+  .bg-picker { display: inline-flex; border: 1px solid #c4ccd8; border-radius: 8px; overflow: hidden; background: var(--surface); }
+  .bg-picker button { font: inherit; font-size: 13px; padding: 4px 10px; border: 0; border-left: 1px solid #c4ccd8; background: transparent; color: var(--ink); cursor: pointer; }
+  .bg-picker button:first-child { border-left: 0; }
+  .bg-picker button[aria-pressed=true] { background: color-mix(in oklab, var(--accent) 10%, white); color: var(--accent); }
+  .top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .top .repo { margin: 0; }
+  html[data-bg] body { background: #07060f center / cover no-repeat fixed; }
+  html[data-bg=desert] body { background-image: url(backgrounds/desert-buttes-road.png); }
+  html[data-bg=fuji] body { background-image: url(backgrounds/fuji-dawn-lake.png); }
+  html[data-bg=harbour] body { background-image: url(backgrounds/harbour-neon-skyline.png); }
+  html[data-bg] main {
+    margin-top: clamp(7rem, 24vh, 16rem); border-radius: 20px; padding: clamp(20px, 4vw, 40px);
+    background: color-mix(in oklab, var(--paper) 96%, transparent); backdrop-filter: blur(8px);
+    box-shadow: 0 24px 64px -24px rgb(0 0 0 / .55);
+  }
+  .credit { display: none; color: var(--muted); font-size: 12px; margin: 0; }
+  html[data-bg] .credit { display: block; }
+
   [hidden] { display: none !important; }
   @media (max-width: 640px) {
     .row { flex-direction: column; }
@@ -156,7 +175,15 @@
 
 <main>
   <header>
-    <p class="repo">GitHub Issues · tarasxryak/cs-math</p>
+    <div class="top">
+      <p class="repo">GitHub Issues · tarasxryak/cs-math</p>
+      <div class="bg-picker" role="group" aria-label="Фон страницы">
+        <button type="button" data-bg="plain" aria-pressed="true">Без фона</button>
+        <button type="button" data-bg="desert" aria-pressed="false">Пустыня</button>
+        <button type="button" data-bg="fuji" aria-pressed="false">Фудзи</button>
+        <button type="button" data-bg="harbour" aria-pressed="false">Гавань</button>
+      </div>
+    </div>
     <h1>Отчёт по задачам за неделю</h1>
     <p class="lead">Выберите любой день — покажем всю его неделю: сколько задач создали, закрыли и сколько ещё в работе.</p>
   </header>
@@ -281,9 +308,19 @@
       </table>
     </div>
   </section>
+  <p class="credit">Фон — анимации «Desert Buttes Road», «Fuji Dawn Lake» и «Neon Harbour Ferry» из ascii-magic-art © 2026 ASCII Magic, лицензия MIT. В прототипе — неподвижный кадр.</p>
 </main>
 
 <script>
+  // Фон: в прототипе — неподвижный кадр сцены, в приложении — анимация.
+  const bgButtons = document.querySelectorAll('.bg-picker button');
+  function setBg(bg) {
+    if (bg === 'plain') delete document.documentElement.dataset.bg; else document.documentElement.dataset.bg = bg;
+    bgButtons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.bg === bg)));
+  }
+  bgButtons.forEach(b => b.addEventListener('click', () => setBg(b.dataset.bg)));
+  setBg(new URLSearchParams(location.search).get('bg') || 'plain');
+
   const weeks = [
     ['16–22 ноября 2026', 10, 6],
     ['9–15 ноября 2026', 0, 0],

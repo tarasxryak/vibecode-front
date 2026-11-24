@@ -83,6 +83,34 @@
   }
 }
 
+/*
+ * Art backgrounds (<html data-bg="desert|fuji|harbour">): the ASCII scene fills the viewport and
+ * every bit of content sits on one near-opaque light panel, so text keeps the same contrast as on
+ * the plain page (muted text stays above 4.5:1 even over a black scene).
+ */
+html[data-bg] body {
+  background-color: #07060f;
+}
+html[data-bg] .app-frame {
+  padding-top: clamp(7rem, 24vh, 16rem);
+}
+html[data-bg] .app-shell {
+  border-radius: 1.25rem;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  background-color: color-mix(in oklab, var(--background) 96%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 24px 64px -24px rgb(0 0 0 / 0.55);
+}
+html[data-bg] .app-credit {
+  display: block;
+}
+@media (max-width: 639px) {
+  html[data-bg] .app-frame {
+    padding-inline: 0.5rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse {
     animation: none;

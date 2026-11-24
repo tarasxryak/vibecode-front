@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { Onest } from "next/font/google"
+
+import { applySavedBackgroundScript } from "@/lib/backgrounds"
 import "./globals.css"
 
 const onest = Onest({
@@ -18,7 +20,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ru" className={`${onest.variable} h-full antialiased`}>
+    // data-bg is set by the inline script before hydration, so React must not warn about it.
+    <html lang="ru" className={`${onest.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: applySavedBackgroundScript }} />
+      </head>
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
   )
