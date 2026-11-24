@@ -38,8 +38,9 @@
 
 /*
  * Тема: холодная «бумага», сине-чёрные чернила, один акцент (выбранная неделя).
- * Цвета метрик повторяют цвета статусов Issues в GitHub.
- * Контраст текста к фону ≥ 4.5:1 (проверено для muted-foreground и всех metric-*).
+ * Цвета метрик — категориальная палитра, проверенная скриптом validate_palette (скилл dataviz):
+ * различимы при дальтонизме (ΔE ≥ 9) и без него (ΔE ≥ 21). Метрики всегда подписаны текстом,
+ * сам текст цвет метрики не носит. Контраст muted-foreground к фону ≥ 4.5:1.
  */
 :root {
   color-scheme: light;
@@ -62,9 +63,9 @@
   --input: #c4ccd8;
   --ring: #2a4fcf;
   --metric-opened: #2a4fcf;
-  --metric-closed: #7444b8;
-  --metric-open: #1b7f45;
-  --metric-progress: #a35f00;
+  --metric-closed: #e0652f;
+  --metric-open: #1b9e6c;
+  --metric-progress: #d9a000;
   --radius: 0.625rem;
 }
 

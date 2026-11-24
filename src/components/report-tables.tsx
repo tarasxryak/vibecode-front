@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { ISSUE_TYPES, METRICS, type Counts, type IssueType, type Metric, type Report } from "@/lib/report"
-import { formatWeekRange, weekDays } from "@/lib/week"
+import { weekDays } from "@/lib/week"
 
 const METRIC_LABELS: Record<Metric, string> = {
   opened: "Создано",
@@ -75,15 +75,17 @@ function TableSection({
   )
 }
 
-function WeekStrip({ weekStart }: { weekStart: string }) {
+export function WeekStrip({ weekStart, picked }: { weekStart: string; picked?: string }) {
+  const days = weekDays(weekStart)
+  const highlighted = days.some((day) => day.iso === picked) ? picked : weekStart
   return (
     <ol aria-hidden className="grid grid-cols-7 gap-1">
-      {weekDays(weekStart).map((day, index) => (
+      {days.map((day) => (
         <li
           key={day.iso}
           className={cn(
             "flex flex-col rounded-md border bg-card px-2 py-1.5 max-sm:items-center max-sm:px-1",
-            index === 0 && "border-primary bg-primary text-primary-foreground"
+            day.iso === highlighted && "border-primary bg-primary text-primary-foreground"
           )}
         >
           <span className="text-xs opacity-80">{day.label}</span>
@@ -94,19 +96,13 @@ function WeekStrip({ weekStart }: { weekStart: string }) {
   )
 }
 
-export function ReportResult({ report }: { report: Report }) {
+export function ReportTables({ report }: { report: Report }) {
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-3">
-        <h2 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-          {formatWeekRange(report.weekStart)}
-        </h2>
-        <WeekStrip weekStart={report.weekStart} />
-        <p className="max-w-[70ch] text-sm text-muted-foreground">
-          «Ещё открыто» и «В работе» считаются по задачам, созданным за эту неделю, на момент
-          сохранения отчёта.
-        </p>
-      </div>
+      <p className="max-w-[70ch] text-sm text-muted-foreground">
+        «Ещё открыто» и «В работе» считаются по задачам, созданным за эту неделю, на момент
+        сохранения отчёта.
+      </p>
 
       <TableSection id="by-type" title="По типу задачи">
         <Table aria-labelledby="by-type" className="max-sm:text-[0.8125rem]">
@@ -181,10 +177,7 @@ export function ReportResult({ report }: { report: Report }) {
 export function ReportSkeleton() {
   return (
     <div className="flex flex-col gap-8" data-testid="report-skeleton">
-      <div className="flex flex-col gap-3">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-14 w-full" />
-      </div>
+      <Skeleton className="h-4 w-full max-w-xl" />
       {["by-type", "by-author"].map((key) => (
         <div key={key} className="flex flex-col gap-3">
           <Skeleton className="h-6 w-40" />

@@ -19,9 +19,9 @@
     --accent-ink: #ffffff;
     --danger: #b42318;
     --created: #2a4fcf;
-    --closed: #7444b8;
-    --open: #1b7f45;
-    --progress: #a35f00;
+    --closed: #e0652f;
+    --open: #1b9e6c;
+    --progress: #d9a000;
     --radius: 10px;
   }
   * { box-sizing: border-box; }
@@ -45,201 +45,287 @@
   .switcher button[aria-pressed="true"] { background: #fff; color: var(--ink); }
   .switcher button:focus-visible { outline: 2px solid #9db4ff; outline-offset: 2px; }
 
-  main { max-width: 920px; margin: 0 auto; padding: 40px 16px 64px; }
+  main { max-width: 920px; margin: 0 auto; padding: 40px 16px 64px; display: flex; flex-direction: column; gap: 40px; }
   .repo { color: var(--muted); font-size: 14px; margin: 0 0 6px; }
-  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 8px; font-weight: 700; }
-  .lead { color: var(--muted); max-width: 60ch; margin: 0 0 28px; }
+  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 8px; font-weight: 700; text-wrap: balance; }
+  .lead { color: var(--muted); max-width: 60ch; margin: 0; }
 
   form { display: flex; flex-direction: column; gap: 8px; max-width: 36rem; }
   .row { display: flex; gap: 12px; }
   label { font-weight: 500; font-size: 14px; }
   input[type=date] {
-    font: inherit; height: 40px; padding: 0 10px; min-width: 200px;
-    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+    font: inherit; height: 40px; padding: 0 10px; width: 240px; cursor: pointer;
+    border: 1px solid #c4ccd8; border-radius: var(--radius); background: var(--surface); color: var(--ink);
   }
   input:focus-visible, .btn:focus-visible { outline: 3px solid color-mix(in oklab, var(--accent) 45%, transparent); outline-offset: 1px; border-color: var(--accent); }
   input[aria-invalid=true] { border-color: var(--danger); }
+  form:has([aria-invalid=true]) label { color: var(--danger); }
   .btn {
     font: inherit; font-weight: 500; height: 40px; padding: 0 16px; border-radius: var(--radius);
     border: 1px solid transparent; background: var(--accent); color: var(--accent-ink); cursor: pointer;
-    display: inline-flex; gap: 8px; align-items: center;
+    display: inline-flex; gap: 8px; align-items: center; justify-content: center; white-space: nowrap;
   }
+  .btn.submit { min-width: 176px; }
   .btn[disabled] { opacity: .6; cursor: progress; }
   .btn.outline { background: var(--surface); color: var(--ink); border-color: var(--line); }
+  .btn.sm { height: 30px; padding: 0 10px; font-size: 13px; }
+  .quick { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
   .hint { color: var(--muted); font-size: 13px; margin: 0; }
   .error-text { color: var(--danger); font-size: 13px; margin: 0; }
-  form:has([aria-invalid=true]) label { color: var(--danger); }
   .badge { display: inline-block; margin-left: 8px; padding: 0 8px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; font-weight: 500; color: var(--muted); }
   .spin { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  @media (prefers-reduced-motion: reduce) { .spin { animation-duration: 2.4s; } }
+  @media (prefers-reduced-motion: reduce) { .spin { animation-duration: 2.4s; } .sk { animation: none; } }
 
-  .result { margin-top: 40px; display: flex; flex-direction: column; gap: 28px; }
-
-  /* Полоса недели — главный акцент страницы */
-  .week h2 { font-size: clamp(22px, 4vw, 30px); letter-spacing: -0.01em; margin: 0 0 12px; font-weight: 600; }
-  .strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .result { display: flex; flex-direction: column; gap: 24px; }
+  .week-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+  .week-head h2 { font-size: clamp(22px, 4vw, 30px); letter-spacing: -0.01em; margin: 0; font-weight: 600; }
+  .nav { display: flex; gap: 8px; }
+  .strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 12px; }
   .day { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
-  .day:first-child { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .day.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
   .day b { display: block; font-size: 18px; font-weight: 600; }
   .day small { font-size: 12px; opacity: .8; }
-  .note { color: var(--muted); font-size: 13px; margin: 10px 0 0; max-width: 70ch; }
+  .note { color: var(--muted); font-size: 13px; margin: 0; max-width: 70ch; }
 
   section h3 { font-size: 18px; margin: 0 0 10px; font-weight: 600; }
   .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
   th, td { padding: 10px 12px; text-align: right; border-bottom: 1px solid var(--line); }
   th:first-child, td:first-child { text-align: left; }
-  thead th { font-weight: 500; color: var(--muted); vertical-align: bottom; }
+  thead th { font-weight: 500; vertical-align: bottom; }
   thead th i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
   tfoot td, tfoot th { font-weight: 600; border-bottom: 0; background: color-mix(in oklab, var(--paper) 70%, var(--surface)); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
   tbody th { font-weight: 500; }
   .zero { color: var(--muted); }
   .sk { height: 14px; border-radius: 4px; background: var(--line); animation: pulse 1.4s ease-in-out infinite; }
   @keyframes pulse { 50% { opacity: .45; } }
 
   .empty { border: 1px dashed var(--line); border-radius: var(--radius); padding: 32px 16px; text-align: center; background: var(--surface); }
-  .empty h2 { font-size: 18px; margin: 0 0 6px; }
-  .empty p { color: var(--muted); margin: 0 auto; max-width: 46ch; }
-  .alert { border: 1px solid color-mix(in oklab, var(--danger) 35%, var(--line)); background: var(--surface); border-radius: var(--radius); padding: 14px 16px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
-  .alert strong { color: var(--danger); display: block; }
+  .empty h3 { font-size: 16px; margin: 0 0 6px; }
+  .empty p { color: var(--muted); margin: 0 auto 12px; max-width: 46ch; }
+  .alert { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius); padding: 14px 16px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .alert strong { color: var(--danger); display: block; font-weight: 500; }
   .alert p { margin: 2px 0 0; color: var(--muted); }
 
+  /* Последние недели */
+  .trend-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; justify-content: space-between; }
+  .trend-head h2 { font-size: 20px; margin: 0; font-weight: 600; }
+  .trend-head p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+  .toggle { display: inline-flex; border: 1px solid #c4ccd8; border-radius: 8px; overflow: hidden; }
+  .toggle button { font: inherit; font-size: 13px; padding: 4px 12px; border: 0; border-left: 1px solid #c4ccd8; background: transparent; color: var(--ink); cursor: pointer; }
+  .toggle button:first-child { border-left: 0; }
+  .toggle button[aria-pressed=true] { background: color-mix(in oklab, var(--accent) 10%, white); color: var(--accent); }
+  .legend { display: flex; gap: 16px; padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); list-style: none; margin: 0; }
+  .legend li { display: inline-flex; gap: 6px; align-items: center; }
+  .key { width: 12px; height: 8px; border-radius: 0 2px 2px 0; }
+  .trend td.bars { width: 40%; }
+  .bar { display: block; height: 8px; border-radius: 0 4px 4px 0; }
+  .bar + .bar { margin-top: 2px; }
+  .trend .week a { color: var(--ink); text-decoration: none; font-weight: 500; }
+  .trend .week a:hover { text-decoration: underline; }
+  .trend tr.current { background: color-mix(in oklab, var(--accent) 5%, white); }
+  .trend .missing { color: var(--muted); }
+  .mbars { display: none; }
+
   [hidden] { display: none !important; }
-  @media (max-width: 520px) {
+  @media (max-width: 640px) {
     .row { flex-direction: column; }
+    input[type=date], .btn.submit { width: 100%; }
     .badge { display: none; }
-    input[type=date], .btn { width: 100%; justify-content: center; }
-    th, td { padding: 8px; }
+    th, td { padding: 8px 6px; font-size: 13px; }
     .day { padding: 4px; text-align: center; }
     .day b { font-size: 15px; }
+    .trend td.bars, .trend th.bars { display: none; }
+    .mbars { display: block; margin-top: 6px; }
   }
 </style>
 </head>
 <body>
 <div class="switcher" role="group" aria-label="Состояние прототипа">
   <span>Состояние:</span>
-  <button type="button" data-state="form" aria-pressed="true">Форма</button>
+  <button type="button" data-state="form" aria-pressed="true">Открыта страница</button>
   <button type="button" data-state="invalid" aria-pressed="false">Ошибка ввода</button>
   <button type="button" data-state="loading" aria-pressed="false">Загрузка</button>
   <button type="button" data-state="success" aria-pressed="false">Отчёт</button>
-  <button type="button" data-state="empty" aria-pressed="false">Пусто</button>
+  <button type="button" data-state="empty" aria-pressed="false">Нет отчёта</button>
+  <button type="button" data-state="current" aria-pressed="false">Неделя идёт</button>
   <button type="button" data-state="error" aria-pressed="false">Ошибка сервера</button>
 </div>
 
 <main>
-  <p class="repo">GitHub Issues · tarasxryak/cs-math</p>
-  <h1>Отчёт по задачам за неделю</h1>
-  <p class="lead">Выберите понедельник, чтобы посмотреть сохранённую статистику: сколько задач создали, закрыли и сколько ещё в работе.</p>
+  <header>
+    <p class="repo">GitHub Issues · tarasxryak/cs-math</p>
+    <h1>Отчёт по задачам за неделю</h1>
+    <p class="lead">Выберите любой день — покажем всю его неделю: сколько задач создали, закрыли и сколько ещё в работе.</p>
+  </header>
 
   <form onsubmit="return false" novalidate>
-    <label for="week">Понедельник недели</label>
+    <label for="week">Любой день нужной недели</label>
     <div class="row">
-      <input id="week" type="date" value="2026-11-16" aria-describedby="week-hint">
-      <button class="btn" type="submit" id="submit">Показать отчёт</button>
+      <input id="week" type="date" max="2026-11-25" aria-describedby="week-hint">
+      <button class="btn submit" type="submit" id="submit">Показать отчёт</button>
     </div>
-    <p class="error-text" id="week-error" data-show="invalid" hidden>17 ноября 2026 — вторник. Выберите понедельник, например 16 ноября.</p>
-    <p class="hint" id="week-hint">Неделя — с понедельника по воскресенье, время московское.</p>
+    <p class="error-text" id="week-error" data-show="invalid" hidden>Эта дата ещё не наступила. Выберите сегодняшний день или раньше.</p>
+    <p class="hint" id="week-hint">Покажем всю неделю с понедельника по воскресенье, время московское.</p>
+    <div class="quick" role="group" aria-label="Быстрый выбор">
+      <button class="btn outline sm" type="button">Прошлая неделя</button>
+      <button class="btn outline sm" type="button">Позапрошлая неделя</button>
+    </div>
   </form>
 
-  <div class="result" data-show="loading" hidden aria-busy="true">
-    <div class="week"><div class="sk" style="width: 260px; height: 26px"></div></div>
-    <section>
-      <h3>По типу задачи</h3>
-      <div class="table-wrap"><table><tbody>
-        <tr><td><div class="sk" style="width:120px"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td></tr>
-        <tr><td><div class="sk" style="width:90px"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td></tr>
-        <tr><td><div class="sk" style="width:140px"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td></tr>
-      </tbody></table></div>
-    </section>
-  </div>
-
-  <div class="result" data-show="success" hidden>
-    <div class="week">
-      <h2>16–22 ноября 2026</h2>
-      <div class="strip" aria-hidden="true">
-        <div class="day"><small>пн</small><b>16</b></div>
-        <div class="day"><small>вт</small><b>17</b></div>
-        <div class="day"><small>ср</small><b>18</b></div>
-        <div class="day"><small>чт</small><b>19</b></div>
-        <div class="day"><small>пт</small><b>20</b></div>
-        <div class="day"><small>сб</small><b>21</b></div>
-        <div class="day"><small>вс</small><b>22</b></div>
+  <section class="result" data-show="loading success empty current error" hidden>
+    <div>
+      <div class="week-head">
+        <h2 id="week-title">16–22 ноября 2026</h2>
+        <div class="nav" role="group" aria-label="Соседние недели">
+          <button class="btn outline" type="button">‹ Предыдущая</button>
+          <button class="btn outline" type="button" id="next">Следующая ›</button>
+        </div>
       </div>
+      <div class="strip" aria-hidden="true" id="strip"></div>
+    </div>
+
+    <div data-show="loading" hidden>
+      <div class="sk" style="max-width: 560px; margin-bottom: 24px"></div>
+      <section>
+        <div class="sk" style="width: 160px; height: 20px; margin-bottom: 12px"></div>
+        <div class="table-wrap" style="padding: 16px; display: grid; gap: 12px">
+          <div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div>
+        </div>
+      </section>
+    </div>
+
+    <div data-show="success" hidden style="display: flex; flex-direction: column; gap: 32px">
       <p class="note">«Ещё открыто» и «В работе» считаются по задачам, созданным за эту неделю, на момент сохранения отчёта.</p>
+      <section>
+        <h3>По типу задачи</h3>
+        <div class="table-wrap"><table>
+          <thead><tr>
+            <th scope="col">Тип</th>
+            <th scope="col"><i style="background:var(--created)"></i>Создано</th>
+            <th scope="col"><i style="background:var(--closed)"></i>Закрыто</th>
+            <th scope="col"><i style="background:var(--open)"></i>Ещё открыто</th>
+            <th scope="col"><i style="background:var(--progress)"></i>В работе</th>
+          </tr></thead>
+          <tbody>
+            <tr><th scope="row">Ошибка<span class="badge">bug</span></th><td>3</td><td>2</td><td>1</td><td>1</td></tr>
+            <tr><th scope="row">Задача<span class="badge">task</span></th><td>4</td><td>3</td><td>2</td><td>1</td></tr>
+            <tr><th scope="row">Новая функция<span class="badge">feature</span></th><td>2</td><td>1</td><td>1</td><td class="zero">0</td></tr>
+            <tr><th scope="row">Без типа</th><td>1</td><td class="zero">0</td><td>1</td><td class="zero">0</td></tr>
+          </tbody>
+          <tfoot><tr><th scope="row">Всего</th><td>10</td><td>6</td><td>5</td><td>2</td></tr></tfoot>
+        </table></div>
+      </section>
+      <section>
+        <h3>По автору</h3>
+        <div class="table-wrap"><table>
+          <thead><tr>
+            <th scope="col">Автор</th>
+            <th scope="col"><i style="background:var(--created)"></i>Создано</th>
+            <th scope="col"><i style="background:var(--closed)"></i>Закрыто</th>
+            <th scope="col"><i style="background:var(--open)"></i>Ещё открыто</th>
+            <th scope="col"><i style="background:var(--progress)"></i>В работе</th>
+          </tr></thead>
+          <tbody>
+            <tr><th scope="row">tarasxryak</th><td>6</td><td>4</td><td>3</td><td>2</td></tr>
+            <tr><th scope="row">mira-lebedeva</th><td>3</td><td>2</td><td>1</td><td class="zero">0</td></tr>
+            <tr><th scope="row">k-orlov</th><td>1</td><td class="zero">0</td><td>1</td><td class="zero">0</td></tr>
+          </tbody>
+        </table></div>
+      </section>
     </div>
 
-    <section>
-      <h3>По типу задачи</h3>
-      <div class="table-wrap"><table>
-        <thead><tr>
-          <th scope="col">Тип</th>
-          <th scope="col"><i style="background:var(--created)"></i>Создано</th>
-          <th scope="col"><i style="background:var(--closed)"></i>Закрыто</th>
-          <th scope="col"><i style="background:var(--open)"></i>Ещё открыто</th>
-          <th scope="col"><i style="background:var(--progress)"></i>В работе</th>
-        </tr></thead>
-        <tbody>
-          <tr><th scope="row">Ошибка<span class="badge">bug</span></th><td>3</td><td>2</td><td>1</td><td>1</td></tr>
-          <tr><th scope="row">Задача<span class="badge">task</span></th><td>4</td><td>3</td><td>2</td><td>1</td></tr>
-          <tr><th scope="row">Новая функция<span class="badge">feature</span></th><td>2</td><td>1</td><td>1</td><td class="zero">0</td></tr>
-          <tr><th scope="row">Без типа</th><td>1</td><td class="zero">0</td><td>1</td><td class="zero">0</td></tr>
-        </tbody>
-        <tfoot><tr><th scope="row">Всего</th><td>10</td><td>6</td><td>5</td><td>2</td></tr></tfoot>
-      </table></div>
-    </section>
-
-    <section>
-      <h3>По автору</h3>
-      <div class="table-wrap"><table>
-        <thead><tr>
-          <th scope="col">Автор</th>
-          <th scope="col"><i style="background:var(--created)"></i>Создано</th>
-          <th scope="col"><i style="background:var(--closed)"></i>Закрыто</th>
-          <th scope="col"><i style="background:var(--open)"></i>Ещё открыто</th>
-          <th scope="col"><i style="background:var(--progress)"></i>В работе</th>
-        </tr></thead>
-        <tbody>
-          <tr><th scope="row">tarasxryak</th><td>6</td><td>4</td><td>3</td><td>2</td></tr>
-          <tr><th scope="row">mira-lebedeva</th><td>3</td><td>2</td><td>1</td><td class="zero">0</td></tr>
-          <tr><th scope="row">k-orlov</th><td>1</td><td class="zero">0</td><td>1</td><td class="zero">0</td></tr>
-        </tbody>
-      </table></div>
-    </section>
-  </div>
-
-  <div class="result" data-show="empty" hidden>
-    <div class="empty">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="padding:7px;border-radius:8px;background:var(--line);margin-bottom:12px"><path d="M8 2v4M16 2v4M21 11.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6.5M3 10h18"/><circle cx="18" cy="18" r="3"/><path d="m22 22-1.5-1.5"/></svg>
-      <h2>За эту неделю отчёта нет</h2>
-      <p>Неделя 23–29 ноября 2026 не сохранена. Отчёт появляется после запуска Lab 7.2 по понедельникам. Выберите другую неделю.</p>
+    <div class="empty" data-show="empty" hidden>
+      <h3>За эту неделю отчёта нет</h3>
+      <p>Lab 7.2 не сохранил отчёт за эту неделю. Выберите другую неделю или посмотрите список последних недель ниже.</p>
     </div>
-  </div>
 
-  <div class="result" data-show="error" hidden>
-    <div class="alert" role="alert">
+    <div class="empty" data-show="current" hidden>
+      <h3>Неделя ещё идёт</h3>
+      <p>Отчёт за эту неделю появится в понедельник, 30 ноября, после 09:00 по Москве.</p>
+      <button class="btn outline" type="button">Открыть прошлую неделю</button>
+    </div>
+
+    <div class="alert" role="alert" data-show="error" hidden>
       <div>
         <strong>Не удалось загрузить отчёт</strong>
-        <p>Сервис отчётов не ответил. Дата сохранена — можно повторить запрос.</p>
+        <p>Сервис отчётов не ответил.</p>
+        <p>Дата сохранена — можно повторить запрос.</p>
       </div>
       <button class="btn outline" type="button">↻ Повторить</button>
     </div>
-  </div>
+  </section>
+
+  <section aria-labelledby="trend-title">
+    <div class="trend-head">
+      <div>
+        <h2 id="trend-title">Последние недели</h2>
+        <p>Нажмите на неделю, чтобы открыть её отчёт.</p>
+      </div>
+      <div class="toggle" role="group" aria-label="Сколько недель показать">
+        <button type="button" aria-pressed="false">4 нед.</button>
+        <button type="button" aria-pressed="true">8 нед.</button>
+        <button type="button" aria-pressed="false">12 нед.</button>
+      </div>
+    </div>
+    <div class="table-wrap" style="margin-top: 16px">
+      <ul class="legend" aria-label="Обозначения">
+        <li><span class="key" style="background:var(--created)"></span>Создано</li>
+        <li><span class="key" style="background:var(--closed)"></span>Закрыто</li>
+      </ul>
+      <table class="trend" aria-labelledby="trend-title">
+        <thead><tr><th scope="col">Неделя</th><th scope="col">Создано</th><th scope="col">Закрыто</th><th scope="col" class="bars"><span hidden>График</span></th></tr></thead>
+        <tbody id="trend-body"></tbody>
+      </table>
+    </div>
+  </section>
 </main>
 
 <script>
+  const weeks = [
+    ['16–22 ноября 2026', 10, 6],
+    ['9–15 ноября 2026', 0, 0],
+    ['2–8 ноября 2026', null],
+    ['26 октября — 1 ноября 2026', 3, 4],
+    ['19–25 октября 2026', null],
+    ['12–18 октября 2026', 6, 2],
+    ['5–11 октября 2026', 2, 5],
+    ['28 сентября — 4 октября 2026', null],
+  ];
+  const bars = (o, c) => `<span class="bar" style="width:${o * 10}%;background:var(--created)"></span><span class="bar" style="width:${c * 10}%;background:var(--closed)"></span>`;
+  document.getElementById('trend-body').innerHTML = weeks.map(([name, o, c], i) => o === null
+    ? `<tr><th scope="row" class="missing">${name}</th><td colspan="3" class="missing" style="text-align:left">нет отчёта</td></tr>`
+    : `<tr data-row="${i}"><th scope="row" class="week"><a href="#success">${name}</a><span class="mbars">${bars(o, c)}</span></th><td>${o}</td><td>${c}</td><td class="bars">${bars(o, c)}</td></tr>`
+  ).join('');
+
+  const strip = (days, on) => days.map(([label, day]) => `<div class="day${day === on ? ' on' : ''}"><small>${label}</small><b>${day}</b></div>`).join('');
+  const labels = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'];
+
   const buttons = document.querySelectorAll('.switcher button');
   const submit = document.getElementById('submit');
   const input = document.getElementById('week');
+  const hint = document.getElementById('week-hint');
   function show(state) {
     buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.state === state)));
-    document.querySelectorAll('[data-show]').forEach(el => { el.hidden = el.dataset.show !== state; });
+    document.querySelectorAll('[data-show]').forEach(el => { el.hidden = !el.dataset.show.split(' ').includes(state); });
     const loading = state === 'loading';
     submit.disabled = loading;
-    submit.innerHTML = loading ? '<span class="spin" aria-hidden="true"></span>Загружаем отчёт…' : 'Показать отчёт';
-    input.value = { invalid: '2026-11-17', empty: '2026-11-23' }[state] ?? '2026-11-16';
+    submit.innerHTML = loading ? '<span class="spin" aria-hidden="true"></span>Загружаем…' : 'Показать отчёт';
+    const current = state === 'current';
+    const date = { form: '', invalid: '2026-12-02', current: '2026-11-24', empty: '2026-11-04' }[state] ?? '2026-11-18';
+    input.value = date;
     input.setAttribute('aria-invalid', String(state === 'invalid'));
-    input.setAttribute('aria-describedby', state === 'invalid' ? 'week-error week-hint' : 'week-hint');
+    const title = current ? '23–29 ноября 2026' : state === 'empty' ? '2–8 ноября 2026' : '16–22 ноября 2026';
+    hint.textContent = date && state !== 'invalid'
+      ? `Покажем неделю ${title}.`
+      : 'Покажем всю неделю с понедельника по воскресенье, время московское.';
+    document.getElementById('week-title').textContent = title;
+    const first = current ? 23 : state === 'empty' ? 2 : 16;
+    document.getElementById('strip').innerHTML = strip(labels.map((l, i) => [l, first + i]), Number(date.slice(8)));
+    document.getElementById('next').disabled = current;
+    document.querySelectorAll('.trend tr[data-row]').forEach(tr => tr.classList.toggle('current', tr.dataset.row === '0' && ['success', 'loading', 'error'].includes(state)));
     if (location.hash.slice(1) !== state) history.replaceState(null, '', '#' + state);
   }
   buttons.forEach(b => b.addEventListener('click', () => show(b.dataset.state)));

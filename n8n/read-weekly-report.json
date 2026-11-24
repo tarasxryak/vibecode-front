@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Read weekly report (Lab 8)\nGET `/webhook/lab8-weekly-report?weekStart=YYYY-MM-DD` → `{ report }` из таблицы **lab72_weekly_stats**. Если строки нет — `{ report: null }`.\nДля защиты: в **Webhook** выбери Authentication → Header Auth, имя `Authorization`, значение `Bearer <токен>`; тот же токен положи в `N8N_WEBHOOK_TOKEN` на Vercel.",
+        "content": "## Read weekly report (Lab 8)\nGET `/webhook/lab8-weekly-report?weekStart=YYYY-MM-DD` → `{ report }` из таблицы **lab72_weekly_stats**, или `{ report: null }`.\nGET `/webhook/lab8-weekly-history` → `{ reports: [{ weekStart, totals }] }` — все сохранённые недели, новые сверху.\nЗащита: в обоих Webhook выбери Authentication → Header Auth (`Authorization: Bearer <токен>`), тот же токен — в `N8N_WEBHOOK_TOKEN` на Vercel.",
         "width": 980,
-        "height": 176,
+        "height": 200,
         "color": 4
       },
       "type": "n8n-nodes-base.stickyNote",
@@ -193,7 +193,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({ error: 'weekStart должен быть понедельником в формате YYYY-MM-DD' }) }}",
+        "responseBody": "={{ JSON.stringify({ error: 'weekStart должен быть понедельником в формате YYYY-MM-DD.' }) }}",
         "options": {
           "responseCode": 400
         }
@@ -206,6 +206,126 @@
       ],
       "id": "079eb829-4e0f-4773-a308-a784f50a72cc",
       "name": "Respond 400"
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "lab8-weekly-history",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        360
+      ],
+      "id": "fd2c71ff-fea7-4c15-81de-8e82e73cdd29",
+      "name": "History webhook",
+      "webhookId": "3c667323-6e13-4f21-8285-0a73a68da5c6"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "lab72_weekly_stats",
+        "columns": {
+          "column": [
+            {
+              "name": "repository",
+              "type": "string"
+            },
+            {
+              "name": "week_start",
+              "type": "string"
+            },
+            {
+              "name": "stats_json",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        360
+      ],
+      "id": "2ccf0ae0-6411-4dc0-9b41-f5c8151cad7d",
+      "name": "Open table for history"
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "={{ $('Open table for history').first().json.id }}",
+          "mode": "id"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "repository",
+              "condition": "eq",
+              "keyValue": "tarasxryak/cs-math"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        360
+      ],
+      "id": "8106d8f7-6153-48c1-8204-2909a7d21a4d",
+      "name": "List saved weeks",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Все сохранённые недели репозитория: { reports: [{ weekStart, totals }] }, новые сверху.\n// Пустой item (строк нет, alwaysOutputData) и битый stats_json пропускаются, а не роняют ответ.\nconst reports = [];\nfor (const { json: row } of $input.all()) {\n  if (!row.week_start || !row.stats_json) continue;\n  try {\n    const stats = JSON.parse(row.stats_json);\n    if (stats?.totals) reports.push({ weekStart: row.week_start, totals: stats.totals });\n  } catch (error) {\n    // Строка с повреждённым stats_json не должна скрывать остальные недели.\n  }\n}\nreports.sort((a, b) => b.weekStart.localeCompare(a.weekStart));\nreturn [{ json: { repository: 'tarasxryak/cs-math', reports: reports.slice(0, 104) } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        360
+      ],
+      "id": "776d95e8-ac4a-4433-bb11-f3f60bcc325e",
+      "name": "Build history"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        360
+      ],
+      "id": "bafe0106-a481-44e3-999d-bd0d973f18b8",
+      "name": "Respond with history"
     }
   ],
   "pinData": {},
@@ -277,6 +397,50 @@
         [
           {
             "node": "Respond with report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "History webhook": {
+      "main": [
+        [
+          {
+            "node": "Open table for history",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Open table for history": {
+      "main": [
+        [
+          {
+            "node": "List saved weeks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List saved weeks": {
+      "main": [
+        [
+          {
+            "node": "Build history",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build history": {
+      "main": [
+        [
+          {
+            "node": "Respond with history",
             "type": "main",
             "index": 0
           }

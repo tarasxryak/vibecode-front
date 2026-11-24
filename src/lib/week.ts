@@ -27,11 +27,29 @@ function toIso(time: number): string {
   return new Date(time).toISOString().slice(0, 10)
 }
 
-export function previousMonday(value: string): string | null {
+/** Monday of the Mon–Sun week that contains `value`. */
+export function mondayOf(value: string): string | null {
   const time = parseIsoDate(value)
   if (time === null) return null
   const offset = (new Date(time).getUTCDay() + 6) % 7
   return toIso(time - offset * DAY_MS)
+}
+
+export function addWeeks(monday: string, weeks: number): string {
+  const time = parseIsoDate(monday)
+  return time === null ? monday : toIso(time + weeks * 7 * DAY_MS)
+}
+
+// Lab 7.2 counts weeks in Moscow time, which has no DST (UTC+3).
+const MOSCOW_OFFSET_MS = 3 * 60 * 60 * 1000
+
+export function moscowToday(now: number = Date.now()): string {
+  return toIso(now + MOSCOW_OFFSET_MS)
+}
+
+/** Monday of the latest week that has fully ended in Moscow — the newest week Lab 7.2 can save. */
+export function lastFinishedMonday(now: number = Date.now()): string {
+  return addWeeks(mondayOf(moscowToday(now))!, -1)
 }
 
 const weekday = new Intl.DateTimeFormat("ru-RU", { weekday: "long", timeZone: "UTC" })

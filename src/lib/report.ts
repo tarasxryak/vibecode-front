@@ -36,6 +36,42 @@ function parseCounts(value: unknown, where: string): Counts {
   return counts
 }
 
+/** One calendar week in the trend; `totals` is null when no report was saved for it. */
+export type HistoryWeek = { weekStart: string; totals: Counts | null }
+
+/** Shape of `GET /api/history`: the requested weeks, newest first, gaps included. */
+export type HistoryResponse = { weeks: HistoryWeek[] }
+
+/** Validates the history webhook payload: `{ reports: [{ weekStart, totals }] }`. */
+export function parseHistoryReports(value: unknown): { weekStart: string; totals: Counts }[] {
+  if (!isRecord(value) || !Array.isArray(value.reports)) {
+    throw new ReportFormatError("Ответ без массива reports")
+  }
+  return value.reports.map((entry, index) => {
+    if (!isRecord(entry) || typeof entry.weekStart !== "string") {
+      throw new ReportFormatError(`reports[${index}]: нет weekStart`)
+    }
+    return { weekStart: entry.weekStart, totals: parseCounts(entry.totals, `reports[${index}].totals`) }
+  })
+}
+
+export function parseHistoryResponse(value: unknown): HistoryResponse {
+  if (!isRecord(value) || !Array.isArray(value.weeks)) {
+    throw new ReportFormatError("Ответ без массива weeks")
+  }
+  return {
+    weeks: value.weeks.map((entry, index) => {
+      if (!isRecord(entry) || typeof entry.weekStart !== "string") {
+        throw new ReportFormatError(`weeks[${index}]: нет weekStart`)
+      }
+      return {
+        weekStart: entry.weekStart,
+        totals: entry.totals === null ? null : parseCounts(entry.totals, `weeks[${index}].totals`),
+      }
+    }),
+  }
+}
+
 /** Validates the webhook payload so the UI never renders half-broken tables. */
 export function parseReportResponse(value: unknown): ReportResponse {
   if (!isRecord(value) || !("report" in value)) {

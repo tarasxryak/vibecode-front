@@ -14,15 +14,32 @@ const responses = {
   "2026-10-26": [200, JSON.stringify({ report: { repository: "tarasxryak/cs-math" } })],
 }
 
+// Saved weeks for the history webhook, newest first, as n8n «Build history» returns them.
+const history = JSON.stringify({
+  repository: "tarasxryak/cs-math",
+  reports: [
+    { weekStart: "2026-11-16", totals: JSON.parse(fixture("report-2026-11-16.json")).report.totals },
+    { weekStart: "2026-11-09", totals: { opened: 0, closed: 0, open: 0, progress: 0 } },
+    { weekStart: "2026-10-19", totals: { opened: 4, closed: 5, open: 1, progress: 1 } },
+  ],
+})
+
 createServer((request, response) => {
   const url = new URL(request.url, `http://127.0.0.1:${port}`)
-  if (url.pathname !== "/webhook/lab8-weekly-report") {
+  const isReport = url.pathname === "/webhook/lab8-weekly-report"
+  const isHistory = url.pathname === "/webhook/lab8-weekly-history"
+  if (!isReport && !isHistory) {
     response.writeHead(404).end()
     return
   }
   if (token && request.headers.authorization !== `Bearer ${token}`) {
     response.writeHead(403, { "Content-Type": "application/json" })
     response.end(JSON.stringify({ message: "Authorization data is wrong!" }))
+    return
+  }
+  if (isHistory) {
+    response.writeHead(200, { "Content-Type": "application/json" })
+    response.end(history)
     return
   }
   const [status, body] = responses[url.searchParams.get("weekStart")] ?? [
