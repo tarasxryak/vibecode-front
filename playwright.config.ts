@@ -11,7 +11,7 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
     baseURL: `http://127.0.0.1:${APP_PORT}`,
-    // ru-RU makes the native date field use ДД.ММ.ГГГГ segments, as real users see it.
+    // Russian UI locale; on macOS Chromium this also gives the date field ДД.ММ.ГГГГ segments.
     locale: "ru-RU",
     timezoneId: "Europe/Moscow",
     trace: "retain-on-failure",

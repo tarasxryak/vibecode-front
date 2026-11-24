@@ -7,7 +7,7 @@ import { dateField, errorAlert, expectRow, submitButton, typeDate } from "./help
 
 test("основной сценарий: дата → обе таблицы заполнены @mobile", async ({ page }) => {
   await page.goto("/")
-  await typeDate(page, "16112026")
+  await typeDate(page, "2026-11-16")
   await submitButton(page).click()
 
   await expect(page.getByRole("heading", { name: "16–22 ноября 2026" })).toBeVisible()

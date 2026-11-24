@@ -57,11 +57,36 @@ export function submitButton(page: Page) {
   return page.getByRole("button", { name: /Показать отчёт|Загружаем отчёт/ })
 }
 
-/** Types a date segment by segment, the way a keyboard user fills a ru-RU date field. */
-export async function typeDate(page: Page, ddmmyyyy: string) {
+// The native date field's segment order follows the browser build, not only `locale`:
+// Chromium on macOS shows ДД.ММ.ГГГГ for ru-RU, while the Linux CI build keeps ММ/ДД/ГГГГ.
+const SEGMENT_ORDERS = [
+  ["day", "month", "year"],
+  ["month", "day", "year"],
+  ["year", "month", "day"],
+] as const
+
+/**
+ * Types an ISO date into the date field with real keystrokes, the way a keyboard user does.
+ * Tries each segment order until the field holds exactly `iso`.
+ */
+export async function typeDate(page: Page, iso: string) {
+  const [year, month, day] = iso.split("-")
+  const parts = { year, month, day }
   const field = dateField(page)
-  await field.focus()
-  await page.keyboard.type(ddmmyyyy)
+  for (const order of SEGMENT_ORDERS) {
+    await field.fill("")
+    await field.blur()
+    await field.focus()
+    await page.keyboard.type(order.map((part) => parts[part]).join(""))
+    if ((await field.inputValue()) === iso) return
+  }
+  throw new Error(`The date field did not accept ${iso} typed from the keyboard`)
+}
+
+/** Types raw keys into the first segment, for incomplete input. */
+export async function typeIntoDateField(page: Page, keys: string) {
+  await dateField(page).focus()
+  await page.keyboard.type(keys)
 }
 
 export async function expectRow(page: Page, table: string, row: string, cells: number[]) {

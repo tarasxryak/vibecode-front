@@ -8,6 +8,7 @@ import {
   mockReportApi,
   submitButton,
   typeDate,
+  typeIntoDateField,
   zeroReport,
 } from "./helpers"
 
@@ -39,7 +40,7 @@ test.describe("форма и клавиатура", () => {
 
   test("дату можно ввести с клавиатуры и отправить Enter", async ({ page }) => {
     const api = await mockReportApi(page, { body: fullReport })
-    await typeDate(page, "16112026")
+    await typeDate(page, "2026-11-16")
     await expect(dateField(page)).toHaveValue("2026-11-16")
     await page.keyboard.press("Enter")
 
@@ -62,7 +63,7 @@ test.describe("валидация", () => {
 
   test("не понедельник: ошибка с подсказкой ближайшего понедельника", async ({ page }) => {
     const api = await mockReportApi(page, { body: fullReport })
-    await typeDate(page, "17112026")
+    await typeDate(page, "2026-11-17")
     await page.keyboard.press("Enter")
 
     await expect(
@@ -74,7 +75,7 @@ test.describe("валидация", () => {
 
   test("неполная дата: просим дописать", async ({ page }) => {
     const api = await mockReportApi(page, { body: fullReport })
-    await typeDate(page, "1611")
+    await typeIntoDateField(page, "1611")
     await page.keyboard.press("Enter")
 
     await expect(page.getByText("Дата введена не полностью. Формат: ДД.ММ.ГГГГ")).toBeVisible()
@@ -83,7 +84,7 @@ test.describe("валидация", () => {
 
   test("ошибка исчезает, когда дату исправили", async ({ page }) => {
     const api = await mockReportApi(page, { body: fullReport })
-    await typeDate(page, "17112026")
+    await typeDate(page, "2026-11-17")
     await page.keyboard.press("Enter")
     await expect(dateField(page)).toHaveAttribute("aria-invalid", "true")
 
