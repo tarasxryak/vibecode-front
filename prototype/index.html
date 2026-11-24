@@ -32,20 +32,23 @@
     font: 15px/1.5 "Onest", system-ui, sans-serif;
     font-variant-numeric: tabular-nums;
   }
+  /* Панель состояний — служебная, вне дизайна: цвета не зависят от темы. */
   .switcher {
     position: sticky; top: 0; z-index: 1;
     display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-    padding: 10px 16px; background: var(--ink); color: #fff; font-size: 13px;
+    padding: 10px 16px; background: #17202c; color: #fff; font-size: 13px;
   }
   .switcher span { margin-right: 6px; opacity: .8; }
   .switcher button {
     font: inherit; color: inherit; background: transparent;
     border: 1px solid rgb(255 255 255 / .35); border-radius: 6px; padding: 4px 10px; cursor: pointer;
   }
-  .switcher button[aria-pressed="true"] { background: #fff; color: var(--ink); }
+  .switcher button[aria-pressed="true"] { background: #fff; color: #17202c; }
   .switcher button:focus-visible { outline: 2px solid #9db4ff; outline-offset: 2px; }
 
-  main { max-width: 920px; margin: 0 auto; padding: 40px 16px 64px; display: flex; flex-direction: column; gap: 40px; }
+  main { max-width: 920px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+  .frame { padding: 0 16px 64px; }
+  @media (max-width: 639px) { .frame { padding-inline: 8px; } }
   .repo { color: var(--muted); font-size: 14px; margin: 0 0 6px; }
   h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 8px; font-weight: 700; text-wrap: balance; }
   .lead { color: var(--muted); max-width: 60ch; margin: 0; }
@@ -116,7 +119,7 @@
   .toggle { display: inline-flex; border: 1px solid #c4ccd8; border-radius: 8px; overflow: hidden; }
   .toggle button { font: inherit; font-size: 13px; padding: 4px 12px; border: 0; border-left: 1px solid #c4ccd8; background: transparent; color: var(--ink); cursor: pointer; }
   .toggle button:first-child { border-left: 0; }
-  .toggle button[aria-pressed=true] { background: color-mix(in oklab, var(--accent) 10%, white); color: var(--accent); }
+  .toggle button[aria-pressed=true] { background: color-mix(in oklab, var(--accent) 12%, var(--surface)); color: var(--accent); }
   .legend { display: flex; gap: 16px; padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); list-style: none; margin: 0; }
   .legend li { display: inline-flex; gap: 6px; align-items: center; }
   .key { width: 12px; height: 8px; border-radius: 0 2px 2px 0; }
@@ -125,28 +128,38 @@
   .bar + .bar { margin-top: 2px; }
   .trend .week a { color: var(--ink); text-decoration: none; font-weight: 500; }
   .trend .week a:hover { text-decoration: underline; }
-  .trend tr.current { background: color-mix(in oklab, var(--accent) 5%, white); }
+  .trend tr.current { background: color-mix(in oklab, var(--accent) 8%, var(--surface)); }
   .trend .missing { color: var(--muted); }
   .mbars { display: none; }
 
-  /* Фоны: сцена ASCII Magic в стиле «lines» под почти непрозрачной панелью (как в src/app/globals.css) */
-  .bg-picker { display: inline-flex; border: 1px solid #c4ccd8; border-radius: 8px; overflow: hidden; background: var(--surface); }
-  .bg-picker button { font: inherit; font-size: 13px; padding: 4px 10px; border: 0; border-left: 1px solid #c4ccd8; background: transparent; color: var(--ink); cursor: pointer; }
-  .bg-picker button:first-child { border-left: 0; }
-  .bg-picker button[aria-pressed=true] { background: color-mix(in oklab, var(--accent) 10%, white); color: var(--accent); }
+  /* Темы: одна раскладка для всех, панель есть всегда; у каждой темы свои цвета (как в src/app/globals.css) */
+  body { transition: background-color .4s ease; }
+  main {
+    margin-top: clamp(2.5rem, 10vh, 6rem); border-radius: 20px; padding: clamp(16px, 4vw, 40px);
+    background: color-mix(in oklab, var(--paper) 96%, transparent);
+    box-shadow: 0 24px 64px -24px rgb(0 0 0 / 0); transition: background-color .4s ease, box-shadow .4s ease, color .4s ease;
+  }
+  html[data-bg] main { box-shadow: 0 24px 64px -24px rgb(0 0 0 / .55); backdrop-filter: blur(8px); }
+  html[data-bg] body { background: var(--scene) center / cover no-repeat fixed, var(--page); }
+  html[data-bg=desert] { --page: #0b1220; --scene: url(backgrounds/desert-buttes-road.png); --paper: #f7efe4; --surface: #fffaf3; --ink: #2a1c12; --muted: #6b5141; --line: #e5d3bd; --accent: #a8402a; --danger: #a3261b; }
+  html[data-bg=fuji] { --page: #0d0f1f; --scene: url(backgrounds/fuji-dawn-lake.png); --paper: #f3eff8; --surface: #fdfbff; --ink: #1e1a33; --muted: #5c5674; --line: #ddd5ea; --accent: #5a45b5; --danger: #b42340; }
+  html[data-bg=harbour] { color-scheme: dark; --page: #07060f; --scene: url(backgrounds/harbour-neon-skyline.png); --paper: #14112a; --surface: #1d1938; --ink: #eeecfb; --muted: #aaa6c8; --line: #332d5c; --accent: #ff5ca8; --accent-ink: #14112a; --danger: #ff7a7a; --created: #3987e5; --closed: #d95926; --open: #199e70; --progress: #c98500; }
+  html[data-bg=harbour] input[type=date] { border-color: #3d3670; }
   .top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 6px; }
   .top .repo { margin: 0; }
-  html[data-bg] body { background: #07060f center / cover no-repeat fixed; }
-  html[data-bg=desert] body { background-image: url(backgrounds/desert-buttes-road.png); }
-  html[data-bg=fuji] body { background-image: url(backgrounds/fuji-dawn-lake.png); }
-  html[data-bg=harbour] body { background-image: url(backgrounds/harbour-neon-skyline.png); }
-  html[data-bg] main {
-    margin-top: clamp(7rem, 24vh, 16rem); border-radius: 20px; padding: clamp(20px, 4vw, 40px);
-    background: color-mix(in oklab, var(--paper) 96%, transparent); backdrop-filter: blur(8px);
-    box-shadow: 0 24px 64px -24px rgb(0 0 0 / .55);
-  }
-  .credit { display: none; color: var(--muted); font-size: 12px; margin: 0; }
-  html[data-bg] .credit { display: block; }
+  .theme { position: relative; }
+  .theme-menu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 2; width: 288px; padding: 4px; margin: 0; list-style: none;
+    background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 32px -12px rgb(0 0 0 / .35); }
+  .theme-menu .label { padding: 6px 8px; font-size: 12px; color: var(--muted); }
+  .theme-menu button { all: unset; box-sizing: border-box; width: 100%; display: flex; gap: 12px; align-items: center; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+  .theme-menu button:hover, .theme-menu button:focus-visible { background: color-mix(in oklab, var(--accent) 10%, var(--surface)); }
+  .theme-menu img, .theme-menu .swatch { width: 64px; height: 36px; border-radius: 6px; border: 1px solid var(--line); object-fit: cover; flex: none; }
+  .theme-menu .swatch { background: #f4f6f9; }
+  .theme-menu b { display: block; font-weight: 500; font-size: 14px; }
+  .theme-menu small { color: var(--muted); font-size: 12px; }
+  .theme-menu button[aria-checked=true]::after { content: "✓"; margin-left: auto; }
+  .credit { visibility: hidden; color: var(--muted); font-size: 12px; margin: 0; }
+  html[data-bg] .credit { visibility: visible; }
 
   [hidden] { display: none !important; }
   @media (max-width: 640px) {
@@ -173,15 +186,19 @@
   <button type="button" data-state="error" aria-pressed="false">Ошибка сервера</button>
 </div>
 
-<main>
+<div class="frame"><main>
   <header>
     <div class="top">
       <p class="repo">GitHub Issues · tarasxryak/cs-math</p>
-      <div class="bg-picker" role="group" aria-label="Фон страницы">
-        <button type="button" data-bg="plain" aria-pressed="true">Без фона</button>
-        <button type="button" data-bg="desert" aria-pressed="false">Пустыня</button>
-        <button type="button" data-bg="fuji" aria-pressed="false">Фудзи</button>
-        <button type="button" data-bg="harbour" aria-pressed="false">Гавань</button>
+      <div class="theme">
+        <button class="btn outline sm" type="button" id="theme-button" aria-haspopup="menu" aria-expanded="false" aria-controls="theme-menu">🎨 <span id="theme-name">Без фона</span> ▾</button>
+        <ul class="theme-menu" id="theme-menu" role="menu" aria-label="Тема" hidden>
+          <li class="label" role="presentation">Тема</li>
+          <li role="none"><button role="menuitemradio" data-bg="plain" aria-checked="true"><span class="swatch"></span><span><b>Без фона</b><small>Светлая страница без анимации</small></span></button></li>
+          <li role="none"><button role="menuitemradio" data-bg="desert" aria-checked="false"><img src="backgrounds/desert-buttes-road.png" alt=""><span><b>Пустыня</b><small>Дорога к красным скалам, песочная панель</small></span></button></li>
+          <li role="none"><button role="menuitemradio" data-bg="fuji" aria-checked="false"><img src="backgrounds/fuji-dawn-lake.png" alt=""><span><b>Фудзи</b><small>Рассвет над озером, сиреневая панель</small></span></button></li>
+          <li role="none"><button role="menuitemradio" data-bg="harbour" aria-checked="false"><img src="backgrounds/harbour-neon-skyline.png" alt=""><span><b>Гавань</b><small>Ночной неон над водой, тёмная панель</small></span></button></li>
+        </ul>
       </div>
     </div>
     <h1>Отчёт по задачам за неделю</h1>
@@ -309,17 +326,34 @@
     </div>
   </section>
   <p class="credit">Фон — анимации «Desert Buttes Road», «Fuji Dawn Lake» и «Neon Harbour Ferry» из ascii-magic-art © 2026 ASCII Magic, лицензия MIT. В прототипе — неподвижный кадр.</p>
-</main>
+</main></div>
 
 <script>
-  // Фон: в прототипе — неподвижный кадр сцены, в приложении — анимация.
-  const bgButtons = document.querySelectorAll('.bg-picker button');
+  // Тема: кнопка раскрывает список; в прототипе фон — неподвижный кадр сцены, в приложении — анимация.
+  const themeButton = document.getElementById('theme-button');
+  const themeMenu = document.getElementById('theme-menu');
+  const themeItems = themeMenu.querySelectorAll('button');
+  const names = { plain: 'Без фона', desert: 'Пустыня', fuji: 'Фудзи', harbour: 'Гавань' };
+  function openMenu(open) {
+    themeMenu.hidden = !open;
+    themeButton.setAttribute('aria-expanded', String(open));
+    if (open) themeMenu.querySelector('[aria-checked=true]').focus();
+  }
   function setBg(bg) {
     if (bg === 'plain') delete document.documentElement.dataset.bg; else document.documentElement.dataset.bg = bg;
-    bgButtons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.bg === bg)));
+    themeItems.forEach(b => b.setAttribute('aria-checked', String(b.dataset.bg === bg)));
+    document.getElementById('theme-name').textContent = names[bg];
   }
-  bgButtons.forEach(b => b.addEventListener('click', () => setBg(b.dataset.bg)));
+  themeButton.addEventListener('click', () => openMenu(themeMenu.hidden));
+  themeItems.forEach(b => b.addEventListener('click', () => { setBg(b.dataset.bg); openMenu(false); themeButton.focus(); }));
+  themeMenu.addEventListener('keydown', (e) => {
+    const list = [...themeItems], i = list.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown') { e.preventDefault(); list[(i + 1) % list.length].focus(); }
+    if (e.key === 'ArrowUp') { e.preventDefault(); list[(i - 1 + list.length) % list.length].focus(); }
+    if (e.key === 'Escape') { openMenu(false); themeButton.focus(); }
+  });
   setBg(new URLSearchParams(location.search).get('bg') || 'plain');
+  if (new URLSearchParams(location.search).has('menu')) openMenu(true);
 
   const weeks = [
     ['16–22 ноября 2026', 10, 6],

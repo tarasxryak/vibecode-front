@@ -32,13 +32,10 @@ test.describe("форма и клавиатура", () => {
     await expect(quick.getByRole("button")).toHaveText(["Прошлая неделя", "Позапрошлая неделя"])
   })
 
-  test("Tab: выбор фона, поле, кнопка; фокус виден", async ({ page }) => {
+  test("Tab: меню темы, поле, кнопка; фокус виден", async ({ page }) => {
     await openPage(page)
-    // Base UI renders toggle items with tabindex=-1 on the server and enables one after hydration.
-    await expect(page.getByRole("button", { name: "Без фона" })).toHaveAttribute("tabindex", "0")
     await page.keyboard.press("Tab")
-    // The background picker is one tab stop (arrow keys move inside it).
-    await expect(page.getByRole("button", { name: "Без фона" })).toBeFocused()
+    await expect(page.getByRole("button", { name: /^Тема:/ })).toBeFocused()
     await page.keyboard.press("Tab")
     await expect(dateField(page)).toBeFocused()
     // The date field has several internal stops (segments, picker); the next element after it

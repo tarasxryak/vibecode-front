@@ -2,7 +2,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/* «Гавань» is a dark theme, so shadcn dark: styles apply under it too. */
+@custom-variant dark (&:is(.dark *, [data-bg="harbour"] *));
 
 @theme inline {
   --color-background: var(--background);
@@ -84,31 +85,128 @@
 }
 
 /*
- * Art backgrounds (<html data-bg="desert|fuji|harbour">): the ASCII scene fills the viewport and
- * every bit of content sits on one near-opaque light panel, so text keeps the same contrast as on
- * the plain page (muted text stays above 4.5:1 even over a black scene).
+ * Layout is identical in every theme, so switching never moves content: the page frame and the
+ * panel are always there. On the plain theme the panel has the page colour and no shadow, so it
+ * looks like the page itself. Art themes put a scene behind it and recolour everything inside
+ * (contrast of every text pair checked ≥ 4.5:1, metric colours checked with validate_palette).
  */
-html[data-bg] body {
-  background-color: #07060f;
+:root {
+  --page: var(--background);
+  --panel-shadow: 0 24px 64px -24px rgb(0 0 0 / 0);
 }
-html[data-bg] .app-frame {
-  padding-top: clamp(7rem, 24vh, 16rem);
+body {
+  background-color: var(--page);
+}
+.app-frame {
+  padding: clamp(2.5rem, 10vh, 6rem) 1rem 4rem;
+}
+.app-shell {
+  border-radius: 1.25rem;
+  padding: clamp(1rem, 4vw, 2.5rem);
+  background-color: color-mix(in oklab, var(--background) 96%, transparent);
+  box-shadow: var(--panel-shadow);
+}
+html[data-bg] {
+  --panel-shadow: 0 24px 64px -24px rgb(0 0 0 / 0.55);
 }
 html[data-bg] .app-shell {
-  border-radius: 1.25rem;
-  padding: clamp(1.25rem, 4vw, 2.5rem);
-  background-color: color-mix(in oklab, var(--background) 96%, transparent);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
-  box-shadow: 0 24px 64px -24px rgb(0 0 0 / 0.55);
+}
+.app-credit {
+  visibility: hidden;
 }
 html[data-bg] .app-credit {
-  display: block;
+  visibility: visible;
 }
 @media (max-width: 639px) {
-  html[data-bg] .app-frame {
+  .app-frame {
     padding-inline: 0.5rem;
   }
+}
+
+/* Пустыня: песок и красный камень. */
+html[data-bg="desert"] {
+  --page: #0b1220;
+  --background: #f7efe4;
+  --foreground: #2a1c12;
+  --card: #fffaf3;
+  --card-foreground: #2a1c12;
+  --popover: #fffaf3;
+  --popover-foreground: #2a1c12;
+  --primary: #a8402a;
+  --primary-foreground: #ffffff;
+  --secondary: #eedfcc;
+  --secondary-foreground: #2a1c12;
+  --muted: #eedfcc;
+  --muted-foreground: #6b5141;
+  --accent: #eedfcc;
+  --accent-foreground: #2a1c12;
+  --destructive: #a3261b;
+  --border: #e5d3bd;
+  --input: #d6bfa5;
+  --ring: #a8402a;
+}
+
+/* Фудзи: рассветная сирень. */
+html[data-bg="fuji"] {
+  --page: #0d0f1f;
+  --background: #f3eff8;
+  --foreground: #1e1a33;
+  --card: #fdfbff;
+  --card-foreground: #1e1a33;
+  --popover: #fdfbff;
+  --popover-foreground: #1e1a33;
+  --primary: #5a45b5;
+  --primary-foreground: #ffffff;
+  --secondary: #e6dff0;
+  --secondary-foreground: #1e1a33;
+  --muted: #e6dff0;
+  --muted-foreground: #5c5674;
+  --accent: #e6dff0;
+  --accent-foreground: #1e1a33;
+  --destructive: #b42340;
+  --border: #ddd5ea;
+  --input: #c9bfdb;
+  --ring: #5a45b5;
+}
+
+/* Гавань: ночь и неон, тёмная панель. */
+html[data-bg="harbour"] {
+  color-scheme: dark;
+  --page: #07060f;
+  --background: #14112a;
+  --foreground: #eeecfb;
+  --card: #1d1938;
+  --card-foreground: #eeecfb;
+  --popover: #1d1938;
+  --popover-foreground: #eeecfb;
+  --primary: #ff5ca8;
+  --primary-foreground: #14112a;
+  --secondary: #2a2550;
+  --secondary-foreground: #eeecfb;
+  --muted: #2a2550;
+  --muted-foreground: #aaa6c8;
+  --accent: #2a2550;
+  --accent-foreground: #eeecfb;
+  --destructive: #ff7a7a;
+  --border: #332d5c;
+  --input: #3d3670;
+  --ring: #ff5ca8;
+  --metric-opened: #3987e5;
+  --metric-closed: #d95926;
+  --metric-open: #199e70;
+  --metric-progress: #c98500;
+}
+
+/* Only while a theme is switching (see use-background.ts): colours fade instead of jumping. */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow, outline-color !important;
+  transition-duration: 400ms !important;
+  transition-timing-function: ease !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <>
       <AsciiBackdrop />
-      <div className="app-frame relative z-10 px-4 pt-10 pb-16 sm:pt-14">
+      <div className="app-frame relative z-10">
         <main className="app-shell mx-auto flex w-full max-w-[920px] flex-col gap-8">
           <header className="flex flex-col gap-2">
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
@@ -24,7 +24,7 @@ export default function Home() {
             </p>
           </header>
           <ReportViewer />
-          <footer className="app-credit hidden text-xs text-muted-foreground">
+          <footer className="app-credit text-xs text-muted-foreground">
             Фон — анимации «Desert Buttes Road», «Fuji Dawn Lake» и «Neon Harbour Ferry» из{" "}
             <a
               href="https://github.com/kailashsr38/ascii-magic-art"

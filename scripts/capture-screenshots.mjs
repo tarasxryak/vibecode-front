@@ -53,6 +53,9 @@ for (const [device, viewport] of Object.entries(viewports)) {
     await page.evaluate(() => document.fonts.ready)
     await page.screenshot({ path: `prototype/screenshots/${device}-bg-${bg}.png` })
   }
+  await page.goto(new URL(`../prototype/index.html?menu#form`, import.meta.url).href)
+  await page.evaluate(() => document.fonts.ready)
+  await page.screenshot({ path: `prototype/screenshots/${device}-theme-menu.png` })
 
   await page.clock.setFixedTime(NOW)
   await page.route("**/api/history?*", (route) =>
@@ -86,14 +89,22 @@ for (const [device, viewport] of Object.entries(viewports)) {
     await page.unroute("**/api/report?*")
     await page.route("**/api/report?*", (route) => route.fulfill({ json: report }))
     await page.goto(`${appUrl}/?week=2026-11-18`)
-    await page.getByRole("button", { name: label }).click()
     await page.getByRole("table", { name: "По автору" }).waitFor()
-    await page.locator('[data-testid="ascii-backdrop"] canvas').waitFor()
+    await page.getByRole("button", { name: /^Тема:/ }).click()
+    await page.getByRole("menuitemradio", { name: new RegExp(`^${label}`) }).click()
+    await page.locator('[data-testid="ascii-backdrop"] [data-state="shown"] canvas').waitFor()
     await page.waitForTimeout(400)
     await page.mouse.move(0, 0)
     await page.screenshot({ path: `docs/screenshots/${device}-bg-${bg}.png` })
   }
-  await page.getByRole("button", { name: "Без фона" }).click()
+  // The open theme menu, back on the plain theme.
+  await page.getByRole("button", { name: /^Тема:/ }).click()
+  await page.getByRole("menuitemradio", { name: /^Без фона/ }).click()
+  await page.getByRole("button", { name: /^Тема:/ }).click()
+  await page.getByRole("menu").waitFor()
+  await page.waitForTimeout(300)
+  await page.screenshot({ path: `docs/screenshots/${device}-theme-menu.png` })
+  await page.keyboard.press("Escape")
   await context.close()
 }
 
