@@ -103,15 +103,12 @@ body {
 .app-shell {
   border-radius: 1.25rem;
   padding: clamp(1rem, 4vw, 2.5rem);
-  background-color: color-mix(in oklab, var(--background) 96%, transparent);
+  /* Opaque: without a blur behind it, a see-through panel showed the moving lines behind text. */
+  background-color: var(--background);
   box-shadow: var(--panel-shadow);
 }
 html[data-bg] {
   --panel-shadow: 0 24px 64px -24px rgb(0 0 0 / 0.55);
-}
-html[data-bg] .app-shell {
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
 }
 .app-credit {
   visibility: hidden;

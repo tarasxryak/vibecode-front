@@ -136,10 +136,10 @@
   body { transition: background-color .4s ease; }
   main {
     margin-top: clamp(2.5rem, 10vh, 6rem); border-radius: 20px; padding: clamp(16px, 4vw, 40px);
-    background: color-mix(in oklab, var(--paper) 96%, transparent);
+    background: var(--paper);
     box-shadow: 0 24px 64px -24px rgb(0 0 0 / 0); transition: background-color .4s ease, box-shadow .4s ease, color .4s ease;
   }
-  html[data-bg] main { box-shadow: 0 24px 64px -24px rgb(0 0 0 / .55); backdrop-filter: blur(8px); }
+  html[data-bg] main { box-shadow: 0 24px 64px -24px rgb(0 0 0 / .55); }
   html[data-bg] body { background: var(--scene) center / cover no-repeat fixed, var(--page); }
   html[data-bg=desert] { --page: #0b1220; --scene: url(backgrounds/desert-buttes-road.png); --paper: #f7efe4; --surface: #fffaf3; --ink: #2a1c12; --muted: #6b5141; --line: #e5d3bd; --accent: #a8402a; --danger: #a3261b; }
   html[data-bg=fuji] { --page: #0d0f1f; --scene: url(backgrounds/fuji-dawn-lake.png); --paper: #f3eff8; --surface: #fdfbff; --ink: #1e1a33; --muted: #5c5674; --line: #ddd5ea; --accent: #5a45b5; --danger: #b42340; }
