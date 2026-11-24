@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Прототип — отчёт по задачам</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Те же токены, что в src/app/globals.css */
+  :root {
+    --paper: #f4f6f9;
+    --surface: #ffffff;
+    --ink: #17202c;
+    --muted: #556070;
+    --line: #d8dee7;
+    --accent: #2a4fcf;
+    --accent-ink: #ffffff;
+    --danger: #b42318;
+    --created: #2a4fcf;
+    --closed: #7444b8;
+    --open: #1b7f45;
+    --progress: #a35f00;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 15px/1.5 "Onest", system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  .switcher {
+    position: sticky; top: 0; z-index: 1;
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    padding: 10px 16px; background: var(--ink); color: #fff; font-size: 13px;
+  }
+  .switcher span { margin-right: 6px; opacity: .8; }
+  .switcher button {
+    font: inherit; color: inherit; background: transparent;
+    border: 1px solid rgb(255 255 255 / .35); border-radius: 6px; padding: 4px 10px; cursor: pointer;
+  }
+  .switcher button[aria-pressed="true"] { background: #fff; color: var(--ink); }
+  .switcher button:focus-visible { outline: 2px solid #9db4ff; outline-offset: 2px; }
+
+  main { max-width: 920px; margin: 0 auto; padding: 40px 16px 64px; }
+  .repo { color: var(--muted); font-size: 14px; margin: 0 0 6px; }
+  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 8px; font-weight: 700; }
+  .lead { color: var(--muted); max-width: 60ch; margin: 0 0 28px; }
+
+  form { display: flex; flex-direction: column; gap: 8px; max-width: 36rem; }
+  .row { display: flex; gap: 12px; }
+  label { font-weight: 500; font-size: 14px; }
+  input[type=date] {
+    font: inherit; height: 40px; padding: 0 10px; min-width: 200px;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+  }
+  input:focus-visible, .btn:focus-visible { outline: 3px solid color-mix(in oklab, var(--accent) 45%, transparent); outline-offset: 1px; border-color: var(--accent); }
+  input[aria-invalid=true] { border-color: var(--danger); }
+  .btn {
+    font: inherit; font-weight: 500; height: 40px; padding: 0 16px; border-radius: var(--radius);
+    border: 1px solid transparent; background: var(--accent); color: var(--accent-ink); cursor: pointer;
+    display: inline-flex; gap: 8px; align-items: center;
+  }
+  .btn[disabled] { opacity: .6; cursor: progress; }
+  .btn.outline { background: var(--surface); color: var(--ink); border-color: var(--line); }
+  .hint { color: var(--muted); font-size: 13px; margin: 0; }
+  .error-text { color: var(--danger); font-size: 13px; margin: 0; }
+  form:has([aria-invalid=true]) label { color: var(--danger); }
+  .badge { display: inline-block; margin-left: 8px; padding: 0 8px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; font-weight: 500; color: var(--muted); }
+  .spin { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spin { animation-duration: 2.4s; } }
+
+  .result { margin-top: 40px; display: flex; flex-direction: column; gap: 28px; }
+
+  /* Полоса недели — главный акцент страницы */
+  .week h2 { font-size: clamp(22px, 4vw, 30px); letter-spacing: -0.01em; margin: 0 0 12px; font-weight: 600; }
+  .strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .day { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+  .day:first-child { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .day b { display: block; font-size: 18px; font-weight: 600; }
+  .day small { font-size: 12px; opacity: .8; }
+  .note { color: var(--muted); font-size: 13px; margin: 10px 0 0; max-width: 70ch; }
+
+  section h3 { font-size: 18px; margin: 0 0 10px; font-weight: 600; }
+  .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { padding: 10px 12px; text-align: right; border-bottom: 1px solid var(--line); }
+  th:first-child, td:first-child { text-align: left; }
+  thead th { font-weight: 500; color: var(--muted); vertical-align: bottom; }
+  thead th i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  tfoot td, tfoot th { font-weight: 600; border-bottom: 0; background: color-mix(in oklab, var(--paper) 70%, var(--surface)); }
+  tbody th { font-weight: 500; }
+  .zero { color: var(--muted); }
+  .sk { height: 14px; border-radius: 4px; background: var(--line); animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .45; } }
+
+  .empty { border: 1px dashed var(--line); border-radius: var(--radius); padding: 32px 16px; text-align: center; background: var(--surface); }
+  .empty h2 { font-size: 18px; margin: 0 0 6px; }
+  .empty p { color: var(--muted); margin: 0 auto; max-width: 46ch; }
+  .alert { border: 1px solid color-mix(in oklab, var(--danger) 35%, var(--line)); background: var(--surface); border-radius: var(--radius); padding: 14px 16px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .alert strong { color: var(--danger); display: block; }
+  .alert p { margin: 2px 0 0; color: var(--muted); }
+
+  [hidden] { display: none !important; }
+  @media (max-width: 520px) {
+    .row { flex-direction: column; }
+    .badge { display: none; }
+    input[type=date], .btn { width: 100%; justify-content: center; }
+    th, td { padding: 8px; }
+    .day { padding: 4px; text-align: center; }
+    .day b { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+<div class="switcher" role="group" aria-label="Состояние прототипа">
+  <span>Состояние:</span>
+  <button type="button" data-state="form" aria-pressed="true">Форма</button>
+  <button type="button" data-state="invalid" aria-pressed="false">Ошибка ввода</button>
+  <button type="button" data-state="loading" aria-pressed="false">Загрузка</button>
+  <button type="button" data-state="success" aria-pressed="false">Отчёт</button>
+  <button type="button" data-state="empty" aria-pressed="false">Пусто</button>
+  <button type="button" data-state="error" aria-pressed="false">Ошибка сервера</button>
+</div>
+
+<main>
+  <p class="repo">GitHub Issues · tarasxryak/cs-math</p>
+  <h1>Отчёт по задачам за неделю</h1>
+  <p class="lead">Выберите понедельник, чтобы посмотреть сохранённую статистику: сколько задач создали, закрыли и сколько ещё в работе.</p>
+
+  <form onsubmit="return false" novalidate>
+    <label for="week">Понедельник недели</label>
+    <div class="row">
+      <input id="week" type="date" value="2026-11-16" aria-describedby="week-hint">
+      <button class="btn" type="submit" id="submit">Показать отчёт</button>
+    </div>
+    <p class="error-text" id="week-error" data-show="invalid" hidden>17 ноября 2026 — вторник. Выберите понедельник, например 16 ноября.</p>
+    <p class="hint" id="week-hint">Неделя — с понедельника по воскресенье, время московское.</p>
+  </form>
+
+  <div class="result" data-show="loading" hidden aria-busy="true">
+    <div class="week"><div class="sk" style="width: 260px; height: 26px"></div></div>
+    <section>
+      <h3>По типу задачи</h3>
+      <div class="table-wrap"><table><tbody>
+        <tr><td><div class="sk" style="width:120px"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td></tr>
+        <tr><td><div class="sk" style="width:90px"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td></tr>
+        <tr><td><div class="sk" style="width:140px"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td><td><div class="sk"></div></td></tr>
+      </tbody></table></div>
+    </section>
+  </div>
+
+  <div class="result" data-show="success" hidden>
+    <div class="week">
+      <h2>16–22 ноября 2026</h2>
+      <div class="strip" aria-hidden="true">
+        <div class="day"><small>пн</small><b>16</b></div>
+        <div class="day"><small>вт</small><b>17</b></div>
+        <div class="day"><small>ср</small><b>18</b></div>
+        <div class="day"><small>чт</small><b>19</b></div>
+        <div class="day"><small>пт</small><b>20</b></div>
+        <div class="day"><small>сб</small><b>21</b></div>
+        <div class="day"><small>вс</small><b>22</b></div>
+      </div>
+      <p class="note">«Ещё открыто» и «В работе» считаются по задачам, созданным за эту неделю, на момент сохранения отчёта.</p>
+    </div>
+
+    <section>
+      <h3>По типу задачи</h3>
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th scope="col">Тип</th>
+          <th scope="col"><i style="background:var(--created)"></i>Создано</th>
+          <th scope="col"><i style="background:var(--closed)"></i>Закрыто</th>
+          <th scope="col"><i style="background:var(--open)"></i>Ещё открыто</th>
+          <th scope="col"><i style="background:var(--progress)"></i>В работе</th>
+        </tr></thead>
+        <tbody>
+          <tr><th scope="row">Ошибка<span class="badge">bug</span></th><td>3</td><td>2</td><td>1</td><td>1</td></tr>
+          <tr><th scope="row">Задача<span class="badge">task</span></th><td>4</td><td>3</td><td>2</td><td>1</td></tr>
+          <tr><th scope="row">Новая функция<span class="badge">feature</span></th><td>2</td><td>1</td><td>1</td><td class="zero">0</td></tr>
+          <tr><th scope="row">Без типа</th><td>1</td><td class="zero">0</td><td>1</td><td class="zero">0</td></tr>
+        </tbody>
+        <tfoot><tr><th scope="row">Всего</th><td>10</td><td>6</td><td>5</td><td>2</td></tr></tfoot>
+      </table></div>
+    </section>
+
+    <section>
+      <h3>По автору</h3>
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th scope="col">Автор</th>
+          <th scope="col"><i style="background:var(--created)"></i>Создано</th>
+          <th scope="col"><i style="background:var(--closed)"></i>Закрыто</th>
+          <th scope="col"><i style="background:var(--open)"></i>Ещё открыто</th>
+          <th scope="col"><i style="background:var(--progress)"></i>В работе</th>
+        </tr></thead>
+        <tbody>
+          <tr><th scope="row">tarasxryak</th><td>6</td><td>4</td><td>3</td><td>2</td></tr>
+          <tr><th scope="row">mira-lebedeva</th><td>3</td><td>2</td><td>1</td><td class="zero">0</td></tr>
+          <tr><th scope="row">k-orlov</th><td>1</td><td class="zero">0</td><td>1</td><td class="zero">0</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+  </div>
+
+  <div class="result" data-show="empty" hidden>
+    <div class="empty">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="padding:7px;border-radius:8px;background:var(--line);margin-bottom:12px"><path d="M8 2v4M16 2v4M21 11.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6.5M3 10h18"/><circle cx="18" cy="18" r="3"/><path d="m22 22-1.5-1.5"/></svg>
+      <h2>За эту неделю отчёта нет</h2>
+      <p>Неделя 23–29 ноября 2026 не сохранена. Отчёт появляется после запуска Lab 7.2 по понедельникам. Выберите другую неделю.</p>
+    </div>
+  </div>
+
+  <div class="result" data-show="error" hidden>
+    <div class="alert" role="alert">
+      <div>
+        <strong>Не удалось загрузить отчёт</strong>
+        <p>Сервис отчётов не ответил. Дата сохранена — можно повторить запрос.</p>
+      </div>
+      <button class="btn outline" type="button">↻ Повторить</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const buttons = document.querySelectorAll('.switcher button');
+  const submit = document.getElementById('submit');
+  const input = document.getElementById('week');
+  function show(state) {
+    buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.state === state)));
+    document.querySelectorAll('[data-show]').forEach(el => { el.hidden = el.dataset.show !== state; });
+    const loading = state === 'loading';
+    submit.disabled = loading;
+    submit.innerHTML = loading ? '<span class="spin" aria-hidden="true"></span>Загружаем отчёт…' : 'Показать отчёт';
+    input.value = { invalid: '2026-11-17', empty: '2026-11-23' }[state] ?? '2026-11-16';
+    input.setAttribute('aria-invalid', String(state === 'invalid'));
+    input.setAttribute('aria-describedby', state === 'invalid' ? 'week-error week-hint' : 'week-hint');
+    if (location.hash.slice(1) !== state) history.replaceState(null, '', '#' + state);
+  }
+  buttons.forEach(b => b.addEventListener('click', () => show(b.dataset.state)));
+  window.addEventListener('hashchange', () => show(location.hash.slice(1) || 'form'));
+  show(location.hash.slice(1) || 'form');
+</script>
+</body>
+</html>

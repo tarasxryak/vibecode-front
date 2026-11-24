@@ -1,0 +1,293 @@
+{
+  "name": "Read weekly report",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Read weekly report (Lab 8)\nGET `/webhook/lab8-weekly-report?weekStart=YYYY-MM-DD` → `{ report }` из таблицы **lab72_weekly_stats**. Если строки нет — `{ report: null }`.\nДля защиты: в **Webhook** выбери Authentication → Header Auth, имя `Authorization`, значение `Bearer <токен>`; тот же токен положи в `N8N_WEBHOOK_TOKEN` на Vercel.",
+        "width": 980,
+        "height": 176,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -220
+      ],
+      "id": "4583b851-f8db-47f9-b816-7560421ed8c0",
+      "name": "About"
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "lab8-weekly-report",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f6658aef-6331-441d-97e5-3d1ead77f803",
+      "name": "Webhook",
+      "webhookId": "51be0823-5fc9-4185-94f2-6b4b8421fd0b"
+    },
+    {
+      "parameters": {
+        "jsCode": "const weekStart = String($json.query?.weekStart ?? '').trim();\nconst match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(weekStart);\nlet valid = false;\nif (match) {\n  const [, y, m, d] = match.map(Number);\n  const date = new Date(Date.UTC(y, m - 1, d));\n  valid = date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 &&\n    date.getUTCDate() === d && date.getUTCDay() === 1;\n}\nreturn [{ json: { repository: 'tarasxryak/cs-math', weekStart, valid } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "17de34fe-3673-4381-91f9-098b42f4043b",
+      "name": "Validate weekStart"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fe06b955-e662-4885-93a4-2a19b6d156f1",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "dd5c3a6a-3694-47ae-9f7e-4095067ea591",
+      "name": "Is a Monday?"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "lab72_weekly_stats",
+        "columns": {
+          "column": [
+            {
+              "name": "repository",
+              "type": "string"
+            },
+            {
+              "name": "week_start",
+              "type": "string"
+            },
+            {
+              "name": "stats_json",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        680,
+        -100
+      ],
+      "id": "e23a528b-7f33-44f7-8127-577cee150f0d",
+      "name": "Open weekly stats table"
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "={{ $('Open weekly stats table').first().json.id }}",
+          "mode": "id"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "repository",
+              "condition": "eq",
+              "keyValue": "={{ $('Validate weekStart').first().json.repository }}"
+            },
+            {
+              "keyName": "week_start",
+              "condition": "eq",
+              "keyValue": "={{ $('Validate weekStart').first().json.weekStart }}"
+            }
+          ]
+        },
+        "returnAll": false,
+        "limit": 1
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        900,
+        -100
+      ],
+      "id": "947c4892-0246-403d-a5af-3fb8816d0167",
+      "name": "Find saved week",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const { repository, weekStart } = $('Validate weekStart').first().json;\n// «Find saved week» выдаёт пустой item, если строки нет (alwaysOutputData).\nconst row = $input.first()?.json ?? {};\nif (!row.stats_json) {\n  return [{ json: { report: null } }];\n}\n\nlet stats;\ntry {\n  stats = JSON.parse(row.stats_json);\n} catch (error) {\n  throw new Error('stats_json за ' + weekStart + ' не является JSON: ' + error.message);\n}\n\nreturn [{\n  json: {\n    report: {\n      repository: row.repository ?? repository,\n      weekStart: row.week_start ?? weekStart,\n      totals: stats.totals,\n      byType: stats.byType,\n      byAuthor: stats.byAuthor ?? [],\n    },\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        -100
+      ],
+      "id": "b68f90b7-324e-4e7a-9da6-55a530b03188",
+      "name": "Build report"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1340,
+        -100
+      ],
+      "id": "189a11f4-c6bd-42ac-bcea-f9e4a34dfa38",
+      "name": "Respond with report"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ error: 'weekStart должен быть понедельником в формате YYYY-MM-DD' }) }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        680,
+        120
+      ],
+      "id": "079eb829-4e0f-4773-a308-a784f50a72cc",
+      "name": "Respond 400"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate weekStart",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate weekStart": {
+      "main": [
+        [
+          {
+            "node": "Is a Monday?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is a Monday?": {
+      "main": [
+        [
+          {
+            "node": "Open weekly stats table",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 400",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Open weekly stats table": {
+      "main": [
+        [
+          {
+            "node": "Find saved week",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find saved week": {
+      "main": [
+        [
+          {
+            "node": "Build report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build report": {
+      "main": [
+        [
+          {
+            "node": "Respond with report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Moscow"
+  },
+  "tags": []
+}

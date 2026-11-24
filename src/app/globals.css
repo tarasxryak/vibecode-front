@@ -1,0 +1,92 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-onest);
+  --font-heading: var(--font-onest);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-metric-opened: var(--metric-opened);
+  --color-metric-closed: var(--metric-closed);
+  --color-metric-open: var(--metric-open);
+  --color-metric-progress: var(--metric-progress);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+/*
+ * Тема: холодная «бумага», сине-чёрные чернила, один акцент (выбранная неделя).
+ * Цвета метрик повторяют цвета статусов Issues в GitHub.
+ * Контраст текста к фону ≥ 4.5:1 (проверено для muted-foreground и всех metric-*).
+ */
+:root {
+  color-scheme: light;
+  --background: #f4f6f9;
+  --foreground: #17202c;
+  --card: #ffffff;
+  --card-foreground: #17202c;
+  --popover: #ffffff;
+  --popover-foreground: #17202c;
+  --primary: #2a4fcf;
+  --primary-foreground: #ffffff;
+  --secondary: #e8ecf2;
+  --secondary-foreground: #17202c;
+  --muted: #e8ecf2;
+  --muted-foreground: #556070;
+  --accent: #e8ecf2;
+  --accent-foreground: #17202c;
+  --destructive: #b42318;
+  --border: #d8dee7;
+  --input: #c4ccd8;
+  --ring: #2a4fcf;
+  --metric-opened: #2a4fcf;
+  --metric-closed: #7444b8;
+  --metric-open: #1b7f45;
+  --metric-progress: #a35f00;
+  --radius: 0.625rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-variant-numeric: tabular-nums;
+  }
+  html {
+    @apply font-sans;
+    touch-action: manipulation;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse {
+    animation: none;
+  }
+  .animate-spin {
+    animation-duration: 2.4s;
+  }
+}

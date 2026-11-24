@@ -1,0 +1,14 @@
+{
+  "report": {
+    "repository": "tarasxryak/cs-math",
+    "weekStart": "2026-11-09",
+    "totals": { "opened": 0, "closed": 0, "open": 0, "progress": 0 },
+    "byType": {
+      "bug": { "opened": 0, "closed": 0, "open": 0, "progress": 0 },
+      "task": { "opened": 0, "closed": 0, "open": 0, "progress": 0 },
+      "feature": { "opened": 0, "closed": 0, "open": 0, "progress": 0 },
+      "other": { "opened": 0, "closed": 0, "open": 0, "progress": 0 }
+    },
+    "byAuthor": []
+  }
+}
