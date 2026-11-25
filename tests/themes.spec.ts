@@ -9,6 +9,7 @@ const html = (page: Page) => page.locator("html")
 /** Opens the theme menu and picks a theme by its visible name. */
 async function chooseTheme(page: Page, label: string) {
   await trigger(page).click()
+  await expect(page.getByRole("menu")).toBeVisible()
   await page.getByRole("menuitemradio", { name: new RegExp(`^${label}`) }).click()
   await expect(page.getByRole("menu")).toBeHidden()
 }
@@ -123,8 +124,12 @@ test("при смене темы содержимое не сдвигается 
 
   // Regression: reopening the menu after Escape focused an item before the popup was positioned,
   // which scrolled the page to the bottom.
+  // The menu mounts a frame after the click: wait for it, or Escape fires into nothing and the
+  // late-opening menu is then toggled shut by the next trigger click.
   await trigger(page).click()
+  await expect(page.getByRole("menu")).toBeVisible()
   await page.keyboard.press("Escape")
+  await expect(page.getByRole("menu")).toBeHidden()
   for (const label of ["Пустыня", "Гавань", "Без фона"]) {
     await chooseTheme(page, label)
     expect(await page.evaluate(() => window.scrollY), label).toBe(0)
